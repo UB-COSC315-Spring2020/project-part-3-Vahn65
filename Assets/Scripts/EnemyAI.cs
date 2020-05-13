@@ -12,15 +12,18 @@ public class EnemyAI : MonoBehaviour
 {
     protected Animator Animate;
     protected Rigidbody2D rbody2D;
+    protected AudioSource death;
 
     protected virtual void Start()
     {
         Animate = GetComponent<Animator>();
         rbody2D = GetComponent<Rigidbody2D>();
+        death = GetComponent<AudioSource>();
     }
     public void JumpedOn()
     {
         Animate.SetTrigger("Death");
+        death.Play();
     }
     private void Death()
     {

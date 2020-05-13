@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 
 public class GameManager : MonoBehaviour
@@ -33,11 +34,20 @@ public class GameManager : MonoBehaviour
     private TMP_Text JemText;
     [SerializeField]
     private float PlayerHurt = 5f;
+    [SerializeField]
+    private AudioSource Jem;
+    [SerializeField]
+    private AudioSource Footstep;
+    [SerializeField]
+    private int Health;
+    [SerializeField]
+    private TMP_Text HealthAmount;
 
     ///// [Start() Variables] /////
     private Rigidbody2D rbody2D;
     private Animator Animate;
     private Collider2D Coll;
+
 
 
     ///// [Finite State Machine] /////
@@ -55,6 +65,7 @@ public class GameManager : MonoBehaviour
         rbody2D = GetComponent<Rigidbody2D>();
         Animate = GetComponent<Animator>();
         Coll = GetComponent<Collider2D>();
+        HealthAmount.text = Health.ToString();
     }
 
     ////// [MOVEMENT CODE] ////////
@@ -85,6 +96,7 @@ public class GameManager : MonoBehaviour
     {
         if (collision.tag == "Collectable")
         {
+            Jem.Play();
             Destroy(collision.gameObject);
             Jems += 1;
             JemText.text = Jems.ToString();
@@ -92,6 +104,7 @@ public class GameManager : MonoBehaviour
 
 
         }
+
     }
     /// <summary>
     /// This Dictates how an enemy & the Player will be damaged
@@ -100,6 +113,7 @@ public class GameManager : MonoBehaviour
     /// If the Enemy is to my left I should take Damage and move Right
     /// When Jump(); is used it allows the Enemy Killed via Jump to add to the players Jump
     /// Using the FrogAI Script to Trigger an animaton and the Enemies Death
+    /// The HealthHandler Method Restarts the Active Level if the Health Amount is less than or Equal to 0 Updates UI Accordingly
     /// </summary>
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -119,6 +133,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 State = MovementState.Hurt;
+                HealthHandler();
                 if (other.gameObject.transform.position.x > transform.position.x)
                 {
                     rbody2D.velocity = new Vector2(-PlayerHurt, rbody2D.velocity.y);
@@ -134,6 +149,16 @@ public class GameManager : MonoBehaviour
 
             }
 
+        }
+    }
+
+    private void HealthHandler()
+    {
+        Health -= 1;
+        HealthAmount.text = Health.ToString();
+        if (Health <= 0)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 
@@ -194,6 +219,7 @@ public class GameManager : MonoBehaviour
     /// If-Else Bool Coll.IsTouchingLayers makes it so when the player jumps and returns to touch the collider it reverts the player to an Idle State
     /// Creates a New Method in which one can call to the enum "state" to dictate the velocity of the player in a certain animation state
     /// Sets the State function as an int to be used in Animator
+    /// FootStepSound Method Creates an Event in Which the FootStep Sound Can be played when set up in the Animator and calls to the Componet AudioSource and the Var Footstep 
     /// </summary>
     private void AnimationState()
     {
@@ -227,6 +253,11 @@ public class GameManager : MonoBehaviour
         {
             State = MovementState.Idle;
         }
+    }
+
+    private void FootstepSound()
+    {
+        Footstep.Play();
     }
 }
 
